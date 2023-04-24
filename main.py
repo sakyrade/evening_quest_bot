@@ -121,38 +121,7 @@ async def send_welcome(message: types.Message, state: FSMContext):
                        'Каждое задание закодировано в QR-коде. Сами QR-коды будут расклеены заранее в 4-ом корпусе. ' \
                        'Удачи, и да победит умнейший!'
 
-        words = text_welcome.split(sep=' ')
-
-        current_mes = await message.answer(words[0][0])
-        is_first_start = True
-        is_end_of_sentence = False
-
-        for word in words:
-            await asyncio.sleep(0.4)
-
-            if is_end_of_sentence:
-                is_end_of_sentence = False
-                current_mes = await message.answer(word[0])
-            else:
-                if not is_first_start:
-                    current_mes = await current_mes.edit_text(current_mes.text + ' ' + word[0])
-
-                if len(word) == 1:
-                    continue
-
-            for symbol in word[1:]:
-                if symbol == '!' or symbol == '.':
-                    await asyncio.sleep(0.1)
-
-                    if len(current_mes.text) > 300:
-                        is_end_of_sentence = True
-                        current_mes = await current_mes.edit_text(current_mes.text + symbol)
-                        break
-                else:
-                    await asyncio.sleep(0.05)
-                current_mes = await current_mes.edit_text(current_mes.text + symbol)
-
-            is_first_start = False
+        await message.answer(text_welcome)
 
         captain.is_first_start = False
         captain.tg_id = message.from_user.id
