@@ -1,0 +1,5 @@
+{
+  "mongo_storage_name": "evening_quest_bot_db",
+  "db_connect_string": "postgresql://admin@localhost/evening_quest_bot_db",
+  "bot_api_token": "6100716702:AAEsy0atS9omINqEuCht0bwoCw4wZqrbCAk"
+}
