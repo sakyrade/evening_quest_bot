@@ -72,7 +72,7 @@ async def send_task(message: types.Message, state: FSMContext):
 
     captains_tasks = db_repo.find_all(CaptainTask, CaptainTask.tg_name == message.from_user.username)
 
-    if captains_tasks is not None:
+    if len(captains_tasks) != 0:
 
         is_exists = False
 
