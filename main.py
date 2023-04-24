@@ -72,14 +72,16 @@ async def send_task(message: types.Message, state: FSMContext):
 
     captains_tasks = db_repo.find_all(CaptainTask, CaptainTask.tg_name == message.from_user.username)
 
-    is_exists = False
+    if captains_tasks is not None:
 
-    for cp in captains_tasks:
-        is_exists = cp.task.number_of_task == task.number_of_task or is_exists
+        is_exists = False
 
-    if is_exists:
-        await message.answer('Эй! Ты уже выполнял подобное задание! Не-не, дружок, повторно выполнить не получится.')
-        return
+        for cp in captains_tasks:
+            is_exists = cp.task.number_of_task == task.number_of_task or is_exists
+
+        if is_exists:
+            await message.answer('Эй! Ты уже выполнял подобное задание! Не-не, дружок, повторно выполнить не получится.')
+            return
 
     await message.answer('У вас новое сообщение!')
     await message.answer_document(open(task.archive_path + 'message.rar', 'rb'))
