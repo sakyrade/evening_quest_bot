@@ -49,7 +49,7 @@ async def send_notification(message, is_end=False):
 
 
 async def send_task(message: types.Message, state: FSMContext):
-    if time(6, 0, 0) < message.date.time() < time(22, 0, 0):
+    if time(10, 0, 0) < message.date.time() < time(22, 0, 0):
         await message.answer('Я не понимаю о чем ты. Дождись нужного момента.')
         return
 
