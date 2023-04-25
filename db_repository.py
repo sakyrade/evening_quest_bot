@@ -64,5 +64,9 @@ class DbRepository:
 
         return self.db.query(table).filter(predicate).all()
 
+    def add(self, new_data):
+        self.db.add(new_data)
+        self.db.commit()
+
     def close(self):
         self.db.close()

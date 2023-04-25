@@ -32,9 +32,15 @@ db_repo = DbRepository(db_connect_string)
 
 
 async def send_notification(message, is_end=False):
-    captains = db_repo.find_all(Captain, None)
+    captains = db_repo.find_first(Captain, None)
+
+    if len(captains) == 0:
+        return
 
     for captain in captains:
+        if captain.tg_id is None:
+            continue
+
         await bot.send_message(chat_id=captain.tg_id,
                                text=message)
 
@@ -49,7 +55,7 @@ async def send_notification(message, is_end=False):
 
 
 async def send_task(message: types.Message, state: FSMContext):
-    if time(10, 0, 0) < message.date.time() < time(22, 0, 0):
+    if time(6, 0, 0) < message.date.time() < time(22, 0, 0):
         await message.answer('Я не понимаю о чем ты. Дождись нужного момента.')
         return
 
@@ -72,30 +78,27 @@ async def send_task(message: types.Message, state: FSMContext):
 
     captains_tasks = db_repo.find_all(CaptainTask, CaptainTask.tg_name == message.from_user.username)
 
-    if len(captains_tasks) != 0:
+    is_exists = False
 
-        is_exists = False
+    for cp in captains_tasks:
+        is_exists = cp.task.number_of_task == task.number_of_task or is_exists
 
-        for cp in captains_tasks:
-            is_exists = cp.task.number_of_task == task.number_of_task or is_exists
-
-        if is_exists:
-            await message.answer('Эй! Ты уже выполнял подобное задание! Не-не, дружок, повторно выполнить не получится.')
-            return
+    if is_exists:
+        await message.answer('Эй! Ты уже выполнял подобное задание! Не-не, дружок, повторно выполнить не получится.')
+        return
 
     await message.answer('У вас новое сообщение!')
     await message.answer_document(open(task.archive_path + 'message.rar', 'rb'))
 
-    new_captain_task = CaptainTask(tg_name=message.from_user.username,
-                                   task_id=task.task_id)
+    new_captain_task: CaptainTask = CaptainTask(tg_name=message.from_user.username,
+                                                task_id=task.task_id)
 
-    db_repo.db.add(new_captain_task)
-    db_repo.db.commit()
+    db_repo.add(new_captain_task)
 
     await state.set_data({
         'task_id': task.task_id,
         'number_of_task': task.number_of_task,
-        'response': task.result,
+        'result': task.result,
         'is_last': task.is_last
     })
 
@@ -138,13 +141,13 @@ async def process_task(message: types.Message, state: FSMContext):
 
     captain = db_repo.find_first(Captain, Captain.tg_name == message.from_user.username)
 
-    if message.text.upper() != data['response'].upper():
+    if message.text.upper() != data['result'].upper():
         await message.answer('Это не ответ. Подумай ещё.')
         return
 
     time_send_message = datetime.strptime(str(message.date.time()), '%H:%M:%S')
     time_start_send_response = datetime.strptime('22:00:00', '%H:%M:%S')
-    hours = (time_send_message - time_start_send_response).seconds / 60
+    hours = (time_send_message - time_start_send_response).seconds / 60 ** 2
 
     if hours <= 3:
         captain.points += 2
