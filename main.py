@@ -32,7 +32,7 @@ db_repo = DbRepository(db_connect_string)
 
 
 async def send_notification(message, is_end=False):
-    captains = db_repo.find_first(Captain, None)
+    captains = db_repo.find_all(Captain, None)
 
     if len(captains) == 0:
         return
@@ -174,8 +174,8 @@ async def process_task(message: types.Message, state: FSMContext):
 async def startup(dp: Dispatcher):
     scheduler = AsyncIOScheduler()
 
-    scheduler.add_job(send_notification, trigger='cron', hour=21, minute=0,
-                      kwargs={'message': 'Задания можно будет просканировать уже через час! Приготовьтесь!'})
+    scheduler.add_job(send_notification, trigger='cron', hour=21, minute=30,
+                      kwargs={'message': 'Задания можно будет просканировать уже через 30 минут! Приготовьтесь!'})
     scheduler.add_job(send_notification, trigger='cron', hour=22, minute=0,
                       kwargs={'message': 'Сканируйте задания!'})
     scheduler.add_job(send_notification, trigger='cron', hour=5, minute=0,
