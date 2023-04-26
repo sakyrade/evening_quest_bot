@@ -34,9 +34,6 @@ db_repo = DbRepository(db_connect_string)
 async def send_notification(message, is_end=False):
     captains = db_repo.find_all(Captain, None)
 
-    if len(captains) == 0:
-        return
-
     for captain in captains:
         if captain.tg_id is None:
             continue
@@ -90,8 +87,8 @@ async def send_task(message: types.Message, state: FSMContext):
     await message.answer('У вас новое сообщение!')
     await message.answer_document(open(task.archive_path + 'message.rar', 'rb'))
 
-    new_captain_task: CaptainTask = CaptainTask(tg_name=message.from_user.username,
-                                                task_id=task.task_id)
+    new_captain_task = CaptainTask(tg_name=message.from_user.username,
+                                   task_id=task.task_id)
 
     db_repo.add(new_captain_task)
 
@@ -147,7 +144,7 @@ async def process_task(message: types.Message, state: FSMContext):
 
     time_send_message = datetime.strptime(str(message.date.time()), '%H:%M:%S')
     time_start_send_response = datetime.strptime('22:00:00', '%H:%M:%S')
-    hours = (time_send_message - time_start_send_response).seconds / 60 ** 2
+    hours = (time_send_message - time_start_send_response).seconds // 60 ** 2
 
     if hours <= 3:
         captain.points += 2
@@ -174,8 +171,8 @@ async def process_task(message: types.Message, state: FSMContext):
 async def startup(dp: Dispatcher):
     scheduler = AsyncIOScheduler()
 
-    scheduler.add_job(send_notification, trigger='cron', hour=21, minute=30,
-                      kwargs={'message': 'Задания можно будет просканировать уже через 30 минут! Приготовьтесь!'})
+    scheduler.add_job(send_notification, trigger='cron', hour=21, minute=0,
+                      kwargs={'message': 'Задания можно будет просканировать уже через час! Приготовьтесь!'})
     scheduler.add_job(send_notification, trigger='cron', hour=22, minute=0,
                       kwargs={'message': 'Сканируйте задания!'})
     scheduler.add_job(send_notification, trigger='cron', hour=5, minute=0,
