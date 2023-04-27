@@ -156,8 +156,7 @@ async def process_task(message: types.Message, state: FSMContext):
     elif 6.6 < hours <= 9.9:
         captain.points += 1
 
-    captain_task = db_repo.find_first(CaptainTask, CaptainTask.tg_name == message.from_user.username and
-                                      CaptainTask.task_id == data['task_id'])
+    captain_task = db_repo.find_first(CaptainTask, CaptainTask.tg_name == message.from_user.username, CaptainTask.task_id == data['task_id'])
 
     captain_task.true_response_date = message.date
     db_repo.db.commit()

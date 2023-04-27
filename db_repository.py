@@ -55,8 +55,8 @@ class DbRepository:
 
         self.db = Session(autoflush=False, bind=engine)
 
-    def find_first(self, table, predicate):
-        return self.db.query(table).filter(predicate).first()
+    def find_first(self, table, *predicates):
+        return self.db.query(table).filter(*predicates).first()
 
     def find_all(self, table, predicate):
         if predicate is None:
