@@ -147,13 +147,13 @@ async def process_task(message: types.Message, state: FSMContext):
 
     time_send_message = datetime.strptime(str(message.date.time()), '%H:%M:%S')
     time_start_send_response = datetime.strptime('22:00:00', '%H:%M:%S')
-    hours = (time_send_message - time_start_send_response).seconds // 60 ** 2
+    hours = (time_send_message - time_start_send_response).seconds / 60 ** 2
 
-    if hours <= 3:
+    if hours <= 3.3:
         captain.points += 2
-    elif 3 < hours <= 5:
+    elif 3.3 < hours <= 6.6:
         captain.points += 1.5
-    elif 5 < hours <= 8:
+    elif 6.6 < hours <= 9.9:
         captain.points += 1
 
     captain_task = db_repo.find_first(CaptainTask, CaptainTask.tg_name == message.from_user.username and
