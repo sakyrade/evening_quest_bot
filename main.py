@@ -42,11 +42,14 @@ async def send_notification(message, is_end=False):
                                text=message)
 
     if is_end:
-        data = await mongo_storage.get_data(user=captains[0].tg_id)
+        for captain in captains:
+            data = await mongo_storage.get_data(user=captain.tg_id)
 
-        for task in db_repo.find_all(Task, Task.number_of_task == data['number_of_task']):
-            task.is_active = False
-            db_repo.db.commit()
+            if data is not None:
+                for task in db_repo.find_all(Task, Task.number_of_task == data['number_of_task']):
+                    task.is_active = False
+                    db_repo.db.commit()
+                break
 
         await mongo_storage.reset_all()
 
@@ -171,13 +174,13 @@ async def process_task(message: types.Message, state: FSMContext):
 async def startup(dp: Dispatcher):
     scheduler = AsyncIOScheduler()
 
-    scheduler.add_job(send_notification, trigger='cron', hour=21, minute=0,
-                      kwargs={'message': 'Задания можно будет просканировать уже через час! Приготовьтесь!'})
-    scheduler.add_job(send_notification, trigger='cron', hour=22, minute=0,
+    scheduler.add_job(send_notification, trigger='cron', hour=11, minute=10,
+                      kwargs={'message': 'Задания можно будет просканировать уже через 10 минут! Приготовьтесь!'})
+    scheduler.add_job(send_notification, trigger='cron', hour=11, minute=20,
                       kwargs={'message': 'Сканируйте задания!'})
-    scheduler.add_job(send_notification, trigger='cron', hour=5, minute=0,
+    scheduler.add_job(send_notification, trigger='cron', hour=14, minute=0,
                       kwargs={'message': 'Задания закроются через час! Поторопитесь!'})
-    scheduler.add_job(send_notification, trigger='cron', hour=6, minute=0,
+    scheduler.add_job(send_notification, trigger='cron', hour=15, minute=0,
                       kwargs={'message': 'Задания закрыты!', 'is_end': True})
 
     scheduler.start()
