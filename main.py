@@ -55,7 +55,7 @@ async def send_notification(message, is_end=False):
 
 
 async def send_task(message: types.Message, state: FSMContext):
-    if time(15, 0, 0) < message.date.time() < time(11, 20, 0):
+    if time(15, 0, 0) < message.date.time() < time(11, 10, 0):
         await message.answer('Я не понимаю о чем ты. Дождись нужного момента.')
         return
 
@@ -174,9 +174,9 @@ async def process_task(message: types.Message, state: FSMContext):
 async def startup(dp: Dispatcher):
     scheduler = AsyncIOScheduler()
 
-    scheduler.add_job(send_notification, trigger='cron', hour=11, minute=10,
+    scheduler.add_job(send_notification, trigger='cron', hour=11, minute=0,
                       kwargs={'message': 'Задания можно будет просканировать уже через 10 минут! Приготовьтесь!'})
-    scheduler.add_job(send_notification, trigger='cron', hour=11, minute=20,
+    scheduler.add_job(send_notification, trigger='cron', hour=11, minute=0,
                       kwargs={'message': 'Сканируйте задания!'})
     scheduler.add_job(send_notification, trigger='cron', hour=14, minute=0,
                       kwargs={'message': 'Задания закроются через час! Поторопитесь!'})
