@@ -34,6 +34,27 @@ db_repo = DbRepository(db_connect_string)
 async def send_notification(message, is_end=False):
     captains = db_repo.find_all(Captain, None)
 
+    if is_end:
+        is_last = True
+
+        for captain in captains:
+            if captain.tg_id is None:
+                continue
+
+            data = await mongo_storage.get_data(user=captain.tg_id)
+
+            if data is not None and not is_last:
+                for task in db_repo.find_all(Task, Task.number_of_task == data['number_of_task']):
+                    task.is_active = False
+                    db_repo.db.commit()
+
+                    #if is_last and task.is_last:
+                    #    winner = db_repo.find_first()
+                    #    message = 'И победителем Вечернего квеста становится ' +
+                break
+
+        await mongo_storage.reset_all()
+
     for captain in captains:
         if captain.tg_id is None:
             continue
@@ -41,17 +62,6 @@ async def send_notification(message, is_end=False):
         await bot.send_message(chat_id=captain.tg_id,
                                text=message)
 
-    if is_end:
-        for captain in captains:
-            data = await mongo_storage.get_data(user=captain.tg_id)
-
-            if data is not None:
-                for task in db_repo.find_all(Task, Task.number_of_task == data['number_of_task']):
-                    task.is_active = False
-                    db_repo.db.commit()
-                break
-
-        await mongo_storage.reset_all()
 
 
 async def send_task(message: types.Message, state: FSMContext):
@@ -162,8 +172,7 @@ async def process_task(message: types.Message, state: FSMContext):
     db_repo.db.commit()
 
     if data['is_last']:
-        await message.answer('Вы прошли наш квест! Мы объявим победителей в нашей группе в VK: '
-                             'https://vk.com/cyber_week_2023')
+        await message.answer('Вы прошли наш квест! Объявление победителя будет в 6:00 по местному времени.')
     else:
         await message.answer('И это правильный ответ! Ищите следующее задание завтра! Удачи!')
 
