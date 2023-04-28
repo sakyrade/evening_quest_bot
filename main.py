@@ -183,9 +183,9 @@ async def startup(dp: Dispatcher):
                       kwargs={'message': 'Задания можно будет просканировать уже через час! Приготовьтесь!'})
     scheduler.add_job(send_notification, trigger='cron', hour=22, minute=0,
                       kwargs={'message': 'Сканируйте задания!'})
-    scheduler.add_job(send_notification, trigger='cron', hour=5, minute=0,
-                      kwargs={'message': 'Задания закроются через час! Поторопитесь!'})
-    scheduler.add_job(send_notification, trigger='cron', hour=6, minute=0,
+    scheduler.add_job(send_notification, trigger='cron', hour=2, minute=50,
+                      kwargs={'message': 'Задания закроются через 10 минут! Поторопитесь!'})
+    scheduler.add_job(send_notification, trigger='cron', hour=3, minute=0,
                       kwargs={'message': 'Задания закрыты!', 'is_end': True})
 
     scheduler.start()
