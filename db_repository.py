@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, TIMESTAMP, Boolean, Column, Integer, String, ForeignKey, REAL, BigInteger
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.orm import relationship, Session
+from sqlalchemy import func
 
 
 class Base(DeclarativeBase):
@@ -56,6 +57,7 @@ class DbRepository:
         self.db = Session(autoflush=False, bind=engine)
 
     def find_first(self, table, *predicates):
+
         return self.db.query(table).filter(*predicates).first()
 
     def find_all(self, table, predicate):
@@ -63,6 +65,9 @@ class DbRepository:
             return self.db.query(table).all()
 
         return self.db.query(table).filter(predicate).all()
+
+    def find_max(self, table, column):
+        return self.db.query(table, func.max(column)).group_by(table).first()
 
     def add(self, new_data):
         self.db.add(new_data)

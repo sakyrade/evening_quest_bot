@@ -35,22 +35,19 @@ async def send_notification(message, is_end=False):
     captains = db_repo.find_all(Captain, None)
 
     if is_end:
-        is_last = True
+        for task in db_repo.find_all(Task, Task.is_active):
+            task.is_active = False
+            db_repo.db.commit()
 
-        for captain in captains:
-            if captain.tg_id is None:
-                continue
-
-            data = await mongo_storage.get_data(user=captain.tg_id)
-
-            if data is not None and not is_last:
-                for task in db_repo.find_all(Task, Task.number_of_task == data['number_of_task']):
-                    task.is_active = False
-                    db_repo.db.commit()
-
-                    #if is_last and task.is_last:
-                    #    winner = db_repo.find_first()
-                    #    message = 'И победителем Вечернего квеста становится ' +
+            if task.is_last:
+                winner = db_repo.find_max(Captain, Captain.points)[0]
+                message = 'И победителем Вечернего квеста становится команда ' + winner.team_name + \
+                          ' и её лидер @' + winner.tg_name + '! Поздравляем!\n' \
+                          'Остальных попрошу не расстраиваться, вы также получите небольшой приз. ' \
+                          'Хотелось бы поблагодарить вас всех за участие в нашем квесте. ' \
+                          'Вы умные ребята и многие из вас станут хорошими специалистами.' \
+                          'Желаю вам успехов в учебе и сдаче летней сессии.\n' \
+                          'Знание - сила!'
                 break
 
         await mongo_storage.reset_all()
@@ -61,7 +58,6 @@ async def send_notification(message, is_end=False):
 
         await bot.send_message(chat_id=captain.tg_id,
                                text=message)
-
 
 
 async def send_task(message: types.Message, state: FSMContext):
@@ -166,7 +162,8 @@ async def process_task(message: types.Message, state: FSMContext):
     elif 6.6 < hours <= 9.9:
         captain.points += 1
 
-    captain_task = db_repo.find_first(CaptainTask, CaptainTask.tg_name == message.from_user.username, CaptainTask.task_id == data['task_id'])
+    captain_task = db_repo.find_first(CaptainTask, CaptainTask.tg_name == message.from_user.username,
+                                      CaptainTask.task_id == data['task_id'])
 
     captain_task.true_response_date = message.date
     db_repo.db.commit()
